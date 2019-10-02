@@ -3,48 +3,41 @@ require "yard"
 require "fileutils"
 require "graphviz"
 
-types = Marshal.load(File.read(".yardoc/object_types"))
+YARD::Registry.load!
 
-module_names = types[:module]
-class_names = types[:class]
-
-def deep_assign(hash, keys, value)
-  key = keys.first
-  raise ArgumentError if key.nil?
-
-  hash[key] = {} unless hash[key].is_a? Hash
-  rest = keys[1..-1]
-  if rest.empty?
-    hash[key] = value
-  else
-    deep_assign(hash[key], rest, value)
+def module_children(namespace)
+  namespace.children.find_all do |code_object|
+    case code_object
+    # Misses ConnectionConfigReaders::*
+    when YARD::CodeObjects::ModuleObject, YARD::CodeObjects::ClassObject
+      true
+    when YARD::CodeObjects::Proxy
+      $stderr.puts "proxy #{code_object.name}"
+    end
   end
 end
 
-nesting = {}
-(module_names + class_names).each do |n|
-  v = n
-  deep_assign(nesting, n.split("::"), v)
-end
-
-def add_clusters(g, nesting)
-  nesting.sort.each do |k, v|
-    case v
-    when Hash
-      sg = g.add_subgraph(cluster: true)
-      sg.attributes[:label] = k
-      add_clusters(sg, v)
-    when String
-      href = v.gsub("::", "/") + ".html"
-      g.add_node(k, shape: "box", href: href)
+def add_clusters(graph, namespace)
+  children = module_children(namespace)
+  if children.empty?
+    href = namespace.path.gsub("::", "/") + ".html"
+    graph.add_node(namespace.path, label: namespace.name, shape: "box", href: href)
+  else
+    if namespace.is_a? YARD::CodeObjects::RootObject
+      sg = graph
     else
-      raise TypeError
+      sg = graph.add_subgraph(cluster: true)
+      sg.attributes[:name] = namespace.path
+      sg.attributes[:label] = namespace.name
+    end
+    children.each do |c|
+      add_clusters(sg, c)
     end
   end
 end
 
 g = Graphviz::Graph.new
-add_clusters(g, nesting)
+add_clusters(g, YARD::Registry.root)
 
 FileUtils.mkdir_p "doc/medoosa"
 base_fn = "doc/medoosa/nesting"
@@ -52,6 +45,19 @@ base_fn = "doc/medoosa/nesting"
 File.open("#{base_fn}.f.dot", "w") do |f|
   g.dump_graph(f)
 end
+
 system "unflatten -c9 -o#{base_fn}.dot #{base_fn}.f.dot"
 system "dot -Tpng -o#{base_fn}.png #{base_fn}.dot"
 system "dot -Tsvg -o#{base_fn}.svg #{base_fn}.dot"
+
+YARD::Registry.load!
+#class_names.each do |n|
+[].each do |n|
+  c = YARD::Registry.resolve(nil, n)
+  raise if c.nil?
+
+  sup = YARD::Registry.resolve(nil, c.superclass)
+  next if sup.nil?
+
+#  puts "#{c.path} < #{sup.path}"
+end
