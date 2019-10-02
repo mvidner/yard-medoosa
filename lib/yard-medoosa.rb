@@ -39,6 +39,16 @@ end
 g = Graphviz::Graph.new
 add_clusters(g, YARD::Registry.root)
 
+YARD::Registry.all(:class_notworking).each do |code_object|
+  sup = YARD::Registry.resolve(nil, code_object.superclass)
+  next if sup.nil?
+
+  p sup.path
+  from = g.get_node(sup.path).first
+  to = g.get_node(code_object.path).first
+  Graphviz::Edge.new(g, from, to, arrowtail: "onormal", dir: "back")
+end
+
 FileUtils.mkdir_p "doc/medoosa"
 base_fn = "doc/medoosa/nesting"
 
@@ -49,15 +59,3 @@ end
 system "unflatten -c9 -o#{base_fn}.dot #{base_fn}.f.dot"
 system "dot -Tpng -o#{base_fn}.png #{base_fn}.dot"
 system "dot -Tsvg -o#{base_fn}.svg #{base_fn}.dot"
-
-YARD::Registry.load!
-#class_names.each do |n|
-[].each do |n|
-  c = YARD::Registry.resolve(nil, n)
-  raise if c.nil?
-
-  sup = YARD::Registry.resolve(nil, c.superclass)
-  next if sup.nil?
-
-#  puts "#{c.path} < #{sup.path}"
-end
