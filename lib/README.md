@@ -8,7 +8,7 @@ Enhance YARD documentation by generating class diagrams.
 and writes
 
 - `doc/medoosa/nesting.png`
-- TODO, `doc/medoosa/nesting.svg` (with hyperlinks)
+- `doc/medoosa/nesting.svg` (with hyperlinks)
 
 ### Name
 

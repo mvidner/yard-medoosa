@@ -23,21 +23,23 @@ end
 
 nesting = {}
 (module_names + class_names).each do |n|
-  # v = n
-  v = 1
+  v = n
   deep_assign(nesting, n.split("::"), v)
 end
 
 def s_add_clusters(gs, nesting)
-  nesting.each do |k, v|
+  nesting.sort.each do |k, v|
     case v
     when Hash
       gs << "subgraph cluster_#{k} {\n"
       gs << "label =\"#{k}\";\n"
       s_add_clusters(gs, v)
       gs << "}\n"
+    when String
+      href = v.gsub("::", "/") + ".html"
+      gs << "\"#{k}\" [shape=box,href=\"#{href}\"];\n"
     else
-      gs << "\"#{k}\" [shape=box];\n"
+      raise TypeError
     end
   end
 end
