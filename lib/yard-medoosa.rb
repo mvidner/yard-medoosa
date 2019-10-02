@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
 require "yard"
+require "fileutils"
 
 types = Marshal.load(File.read(".yardoc/object_types"))
-##pp types
-pp types.map { |k, v| [k, v.size] }.to_h
-
 objects = Marshal.load(File.read(".yardoc/objects/root.dat"))
 
 module_names = types[:module]
@@ -29,30 +27,6 @@ nesting = {}
   v = 1
   deep_assign(nesting, n.split("::"), v)
 end
-pp nesting
-
-require "graphviz"
-
-def add_clusters(graph, nesting)
-  nesting.each do |k, v|
-    case v
-    when Hash
-      c = graph.add_graph("cluster_#{k}")
-      add_clusters(c, v)
-    else
-      graph.add_node(k)
-    end
-  end
-end
-
-graph = GraphViz.new("G") do |g|
-  add_clusters(g, nesting)
-end
-
-graph.output(png: "doc/nesting.png")
-graph.output(dot: "doc/nesting.dot", no_layout: 2)
-
-# --------------
 
 def s_add_clusters(gs, nesting)
   nesting.each do |k, v|
@@ -68,10 +42,13 @@ def s_add_clusters(gs, nesting)
   end
 end
 
-gs = <<TEXT
-digraph g {
-TEXT
-
+gs = "digraph g {\n"
 s_add_clusters(gs, nesting)
 gs << "}\n"
-File.write("doc/nesting_s.dot", gs)
+
+FileUtils.mkdir_p "doc/medoosa"
+base_fn = "doc/medoosa/nesting"
+File.write("#{base_fn}.f.dot", gs)
+system "unflatten -c9 -o#{base_fn}.dot #{base_fn}.f.dot"
+system "dot -Tpng -o#{base_fn}.png #{base_fn}.dot"
+system "dot -Tsvg -o#{base_fn}.svg #{base_fn}.dot"

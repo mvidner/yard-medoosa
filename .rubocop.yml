@@ -1,0 +1,26 @@
+
+Metrics/MethodLength:
+  Max: 25
+
+# Offense count: 1
+# Configuration parameters: MinNameLength, AllowNamesEndingInNumbers, AllowedNames, ForbiddenNames.
+# AllowedNames: io, id, to, by, on, in, at, ip, db
+Naming/UncommunicativeMethodParamName:
+  Exclude:
+    - 'lib/yard-medoosa.rb'
+
+# Offense count: 2
+Security/MarshalLoad:
+  Exclude:
+    - 'lib/yard-medoosa.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: always, never
+Style/FrozenStringLiteralComment:
+  Exclude:
+    - 'lib/yard-medoosa.rb'
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
