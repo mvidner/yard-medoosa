@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 require "yard"
 require "fileutils"
+require "graphviz"
 
 types = Marshal.load(File.read(".yardoc/object_types"))
-objects = Marshal.load(File.read(".yardoc/objects/root.dat"))
 
 module_names = types[:module]
 class_names = types[:class]
@@ -27,30 +27,31 @@ nesting = {}
   deep_assign(nesting, n.split("::"), v)
 end
 
-def s_add_clusters(gs, nesting)
+def add_clusters(g, nesting)
   nesting.sort.each do |k, v|
     case v
     when Hash
-      gs << "subgraph cluster_#{k} {\n"
-      gs << "label =\"#{k}\";\n"
-      s_add_clusters(gs, v)
-      gs << "}\n"
+      sg = g.add_subgraph(cluster: true)
+      sg.attributes[:label] = k
+      add_clusters(sg, v)
     when String
       href = v.gsub("::", "/") + ".html"
-      gs << "\"#{k}\" [shape=box,href=\"#{href}\"];\n"
+      g.add_node(k, shape: "box", href: href)
     else
       raise TypeError
     end
   end
 end
 
-gs = "digraph g {\n"
-s_add_clusters(gs, nesting)
-gs << "}\n"
+g = Graphviz::Graph.new
+add_clusters(g, nesting)
 
 FileUtils.mkdir_p "doc/medoosa"
 base_fn = "doc/medoosa/nesting"
-File.write("#{base_fn}.f.dot", gs)
+
+File.open("#{base_fn}.f.dot", "w") do |f|
+  g.dump_graph(f)
+end
 system "unflatten -c9 -o#{base_fn}.dot #{base_fn}.f.dot"
 system "dot -Tpng -o#{base_fn}.png #{base_fn}.dot"
 system "dot -Tsvg -o#{base_fn}.svg #{base_fn}.dot"
