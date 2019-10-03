@@ -8,7 +8,11 @@ module YARD
 
       def run_generate_with_medoosa(*args)
         run_generate_without_medoosa(*args)
-        generate_medoosa(options.serializer.basepath)
+        fname = generate_medoosa(options.serializer.basepath)
+        options.files << CodeObjects::ExtraFileObject.new(fname)
+        # FIXME: what, do we really run it twice?!
+        # yes, until I figure out a better place to hook generate_medoosa in
+        run_generate_without_medoosa(*args)
       end
 
       alias run_generate_without_medoosa run_generate

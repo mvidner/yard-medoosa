@@ -64,6 +64,8 @@ module YARD
       system "unflatten -l5 -c5 -o#{base_fn}.dot #{base_fn}.f.dot"
       system "dot -Tpng -o#{base_fn}.png #{base_fn}.dot"
       system "dot -Tsvg -o#{base_fn}.svg #{base_fn}.dot"
+
+      "#{base_fn}.svg"
     end
   end
 end
