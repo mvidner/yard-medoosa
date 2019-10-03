@@ -18,23 +18,18 @@ module YARD
     # @param all_nodes [Hash{String => Graphviz::Node}] (filled by the method)
     # @param namespace [YARD::CodeObjects::NamespaceObject]
     def add_clusters(graph, all_nodes, namespace)
+      href = namespace.path.gsub("::", "/") + ".html"
+      n = graph.add_node(namespace.path,
+                         label: namespace.name, shape: "box", href: href)
+      all_nodes[namespace.path] = n
       children = module_children(namespace)
-      if children.empty?
-        href = namespace.path.gsub("::", "/") + ".html"
-        n = graph.add_node(namespace.path,
-                           label: namespace.name, shape: "box", href: href)
-        all_nodes[namespace.path] = n
-      else
-        if namespace.is_a? YARD::CodeObjects::RootObject
-          sg = graph
-        else
-          sg = graph.add_subgraph(cluster: true)
-          sg.attributes[:name] = namespace.path
-          sg.attributes[:label] = namespace.name
-        end
-        children.each do |c|
-          add_clusters(sg, all_nodes, c)
-        end
+      return if children.empty?
+
+      sg = graph.add_subgraph(cluster: true)
+      sg.attributes[:name] = namespace.path
+      sg.attributes[:label] = namespace.name
+      children.each do |c|
+        add_clusters(sg, all_nodes, c)
       end
     end
 
@@ -44,7 +39,9 @@ module YARD
 
       g = Graphviz::Graph.new
       all_nodes = {}
-      add_clusters(g, all_nodes, YARD::Registry.root)
+      module_children(YARD::Registry.root).each do |ns_object|
+        add_clusters(g, all_nodes, ns_object)
+      end
 
       YARD::Registry.all(:class).each do |code_object|
         sup = YARD::Registry.resolve(nil, code_object.superclass)
