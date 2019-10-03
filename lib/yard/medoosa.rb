@@ -8,20 +8,22 @@ module YARD
     def module_children(namespace)
       namespace.children.find_all do |code_object|
         case code_object
-        # Misses ConnectionConfigReaders::*
         when YARD::CodeObjects::ModuleObject, YARD::CodeObjects::ClassObject
           true
-        when YARD::CodeObjects::Proxy
-          $stderr.puts "proxy #{code_object.name}"
         end
       end
     end
 
-    def add_clusters(graph, namespace)
+    # @param graph [Graphviz::Graph]
+    # @param all_nodes [Hash{String => Graphviz::Node}] (filled by the method)
+    # @param namespace [YARD::CodeObjects::NamespaceObject]
+    def add_clusters(graph, all_nodes, namespace)
       children = module_children(namespace)
       if children.empty?
         href = namespace.path.gsub("::", "/") + ".html"
-        graph.add_node(namespace.path, label: namespace.name, shape: "box", href: href)
+        n = graph.add_node(namespace.path,
+                           label: namespace.name, shape: "box", href: href)
+        all_nodes[namespace.path] = n
       else
         if namespace.is_a? YARD::CodeObjects::RootObject
           sg = graph
@@ -31,7 +33,7 @@ module YARD
           sg.attributes[:label] = namespace.name
         end
         children.each do |c|
-          add_clusters(sg, c)
+          add_clusters(sg, all_nodes, c)
         end
       end
     end
@@ -41,13 +43,16 @@ module YARD
       YARD::Registry.load!
 
       g = Graphviz::Graph.new
-      add_clusters(g, YARD::Registry.root)
+      all_nodes = {}
+      add_clusters(g, all_nodes, YARD::Registry.root)
 
       YARD::Registry.all(:class).each do |code_object|
         sup = YARD::Registry.resolve(nil, code_object.superclass)
         next if sup.nil?
 
-        Graphviz::Edge.new(g, sup.path, code_object.path, arrowtail: "onormal", dir: "back")
+        n = all_nodes.fetch(code_object.path)
+        n_sup = all_nodes.fetch(sup.path)
+        n_sup.connect(n, arrowtail: "onormal", dir: "back")
       end
 
       base_fn = "#{basepath}/medoosa-nesting"
