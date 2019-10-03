@@ -4,11 +4,12 @@ Enhance YARD documentation by generating class diagrams.
 
 ## Usage
 
-`yard-medoosa` reads the YARD registry in `.yardoc/`
-and writes
+Add `--plugin medoosa` to your `.yardopts`.
 
-- `doc/medoosa/nesting.png`
-- `doc/medoosa/nesting.svg` (with hyperlinks)
+During `yard doc`, Medoosa will produce diagrams in the output directory:
+
+- `medoosa-nesting.png`
+- `medoosa-nesting.svg` (with hyperlinks)
 
 ### Name
 

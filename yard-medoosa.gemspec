@@ -10,7 +10,8 @@ Gem::Specification.new do |s|
 
   s.files       = [
     "bin/yard-medoosa",
-    "lib/yard-medoosa.rb"
+    "lib/yard-medoosa.rb",
+    "lib/yard/medoosa.rb"
   ]
   s.executables = s.files.grep(/^bin\//) { |f| File.basename(f) }
 

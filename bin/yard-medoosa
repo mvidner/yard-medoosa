@@ -1,3 +1,4 @@
 #!/usr/bin/env ruby
 require "yard-medoosa"
-
+puts "Sorry, standalone script not working yet; use:"
+puts "  yard doc --plugin medoosa"
