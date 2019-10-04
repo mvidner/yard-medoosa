@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.description = "Enhance YARD documentation by generating class diagrams."
   s.authors     = ["Martin Vidner"]
   s.email       = "martin@vidner.net"
-  s.homepage    = "https://rubygems.org/gems/yard-medoosa"
+  s.homepage    = "https://github.com/mvidner/yard-medoosa"
   s.license     = "MIT" # like YARD
 
   s.files       = [
