@@ -6,10 +6,15 @@ Enhance YARD documentation by generating class diagrams.
 
 Add `--plugin medoosa` to your `.yardopts`.
 
-During `yard doc`, Medoosa will produce diagrams in the output directory:
+During `yard doc`, Medoosa will produce diagrams in the output directory,
+linked in the *Files* section:
 
+- `medoosa-nesting.svg` (with classes **hyperlinked** into the rest of the docs)
 - `medoosa-nesting.png`
-- `medoosa-nesting.svg` (with hyperlinks)
+
+Example output:
+
+![medoosa-nesting small](https://user-images.githubusercontent.com/102056/67187700-14013b80-f3eb-11e9-9e15-17ad58d3b0bb.png)
 
 ## Requirements
 
