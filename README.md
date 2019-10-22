@@ -21,7 +21,11 @@ Example output:
 - The [Graphviz programs](https://graphviz.org/download/)
   (`dot` and `unflatten`)
 
-### Name
+## Name
 
-This is a reincarnation
-of [the original Medoosa](http://medoosa.sourceforge.net/).
+If I remember correctly, [Medusa](https://en.wikipedia.org/wiki/Medusa) was
+a mythical woman with hair so tangled that a single look of it made people
+turn into stone.
+Medoosa is the Object Oriented reincarnation, except it produces diagrams that
+are much less tangled. yard-medoosa is inspired
+by [the original C++ Medoosa](http://medoosa.sourceforge.net/).
